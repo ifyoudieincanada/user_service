@@ -5,7 +5,11 @@ defmodule UserService.Router do
     plug :accepts, ["json"]
   end
 
-  scope "/api", UserService do
+  scope "/", UserService do
     pipe_through :api
+
+    resources "/users", UserController, except: [:index, :new, :edit]
+    post "/users/login", UserController, :login
+    post "/users/verify", UserController, :verify
   end
 end
