@@ -15,7 +15,7 @@ defmodule UserService.UserController do
         token = Phoenix.Token.sign(UserService.Endpoint, "user", user.id)
 
         conn
-        |> render("show.json", user: user, token: token)
+        |> render("user.json", %{user: user, token: token})
       {:error, changeset} ->
         conn
         |> put_status(:unprocessable_entity)
@@ -30,7 +30,7 @@ defmodule UserService.UserController do
       id = Ecto.Changeset.get_field(changeset, :id)
       token = Phoenix.Token.sign(UserService.Endpoint, "user", id)
 
-      render(conn, "user.json", token: token, user: Repo.get!(User, id))
+      render(conn, "user.json", %{token: token, user: Repo.get!(User, id)})
     else
       conn
       |> put_status(:unprocessable_entity)
