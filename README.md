@@ -14,24 +14,6 @@ as follows:
       register more accounts, but who really cares tbh.
 
       Users `has_many` Permissions.
-  * Genders
-      The Genders table contains a set of genders that are dynamically-creatable
-      by a User. The columns for the Genders table are as follows:
-
-      `name`, the name of the gender, can be NULL
-      `nominative`, the Nominative pronoun, He/She/Ae
-      `accusative`, the Accusative pronoun, Him/Her/Aer
-      `pronomial_possessive`, the Pronomial Possessive pronoun, His/Her/Aer
-      `predicative_possessive`, the Predicative Possessive pronoun, His/Hers/Aers
-      `reflexive`, the Reflexive pronoun, Himself/Herself/Aerself
-
-      The Genders table has a `has_many` relationship with the Users table.
-
-      The Genders table has a unique constraint across all the keys, so there
-      cannot be duplicate genders.
-
-      By allowing users to create their own genders, we will get submissions such as
-      `Apache Attack Helicopter`, and `FuckGender`. This is fine by me tbh.
   * Permissions
       Permissions should be a list of named permissions that other services will
       recognize and be able to adapt to.
@@ -55,20 +37,16 @@ Endpoints:
 
   * POST /users/create
       The URL used to create Users.
-  * GET /users/:username
+  * GET /users/:user_id
       The URL to get information about a specific User.
   * POST /users/authenticate
       The URL that verifies a User is real with a `username` and `password` and
       returns a signed UserToken.
-  * GET /users/:user?permission=":permission"
+  * GET /users/:user_id?permission=":permission"
       When provided with a `permission` in the payload, it provides whether a user
       has this permission.
-  * GET /users/:user/permissions
+  * GET /users/:user_id/permissions
       Lists all permissions owned by the user
-  * GET /genders
-      A list of all created Genders without references to Users.
-  * POST /genders/create
-      The URL used to create Genders.
   * GET /permissions
       A list of all available permissions and their descriptions.
   * POST /permissions/create
