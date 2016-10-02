@@ -29,4 +29,10 @@ defmodule UserService.UserView do
       }
     }
   end
+
+  def render("bool.json", %{bool: bool}) do
+    %{
+      "bool" => bool
+    }
+  end
 end

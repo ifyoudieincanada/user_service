@@ -60,10 +60,15 @@ defmodule UserService.UserController do
     end
   end
 
-  # def show(conn, %{"id" => id}) do
-  #   user = Repo.get!(User, id)
-  #   render(conn, "show.json", user: user)
-  # end
+  def show(conn, %{"id" => id, "permission" => permission_name}) do
+    user = Repo.get!(User, id)
+
+    permission = Enum.find(user.permissions, fn permission ->
+      permission.name == permission_name
+    end)
+
+    render(conn, "bool.json", bool: permission != nil)
+  end
 
   def update(conn, %{"id" => id, "user" => user_params, "token" => token}) do
     :base64.decode(token)
