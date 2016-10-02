@@ -8,7 +8,7 @@ defmodule UserService.Router do
   scope "/", UserService do
     pipe_through :api
 
-    resources "/users", UserController, except: [:index, :show, :new, :edit]
+    resources "/users", UserController, except: [:index, :new, :edit]
     post "/users/login", UserController, :login
     post "/users/verify", UserController, :verify
 
