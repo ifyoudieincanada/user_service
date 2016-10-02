@@ -11,5 +11,7 @@ defmodule UserService.Router do
     resources "/users", UserController, except: [:index, :new, :edit]
     post "/users/login", UserController, :login
     post "/users/verify", UserController, :verify
+
+    resources "/permissions", PermissionController, except: [:new, :edit, :show, :update]
   end
 end

@@ -6,6 +6,17 @@ defmodule UserService.UserController do
   def create(conn, %{"user" => user_params}) do
     changeset = User.changeset(%User{}, user_params)
 
+    changeset = if Repo.one(User) == nil do
+      admin = %UserService.Permission{
+        name: "admin",
+        description: "In control of literally everything"
+      }
+
+      Ecto.Changeset.put_assoc(changeset, :permissions, [admin])
+    else
+      changeset
+    end
+
     case Repo.insert(changeset) do
       {:ok, user} ->
         conn = conn
@@ -39,13 +50,14 @@ defmodule UserService.UserController do
   end
 
   def verify(conn, %{"token" => token}) do
+    token = :base64.decode(token)
+
     case Phoenix.Token.verify(UserService.Endpoint, "user", token) do
       {:ok, user_id} ->
         render(conn, "user.json", user: Repo.get!(User, user_id), token: token)
       {:error, _} ->
         conn
-        |> put_status(401)
-        |> render("401.json")
+        send_401(conn)
     end
   end
 
@@ -54,27 +66,57 @@ defmodule UserService.UserController do
     render(conn, "show.json", user: user)
   end
 
-  def update(conn, %{"id" => id, "user" => user_params}) do
-    user = Repo.get!(User, id)
-    changeset = User.changeset(user, user_params)
+  def update(conn, %{"id" => id, "user" => user_params, "token" => token}) do
+    :base64.decode(token)
 
-    case Repo.update(changeset) do
-      {:ok, user} ->
-        render(conn, "show.json", user: user)
-      {:error, changeset} ->
+    case verify_user(token, id) do
+      {:ok, id} ->
+        user = Repo.get!(User, id)
+        changeset = User.changeset(user, user_params)
+
+        case Repo.update(changeset) do
+          {:ok, user} ->
+            render(conn, "show.json", user: user)
+          {:error, changeset} ->
+            conn
+            |> put_status(:unprocessable_entity)
+            |> render(UserService.ChangesetView, "error.json", changeset: changeset)
+        end
+      {:error, _} ->
         conn
-        |> put_status(:unprocessable_entity)
-        |> render(UserService.ChangesetView, "error.json", changeset: changeset)
+        send_401(conn)
     end
   end
 
-  def delete(conn, %{"id" => id}) do
-    user = Repo.get!(User, id)
+  def delete(conn, %{"id" => id, "token" => token}) do
+    :base64.decode(token)
 
-    # Here we use delete! (with a bang) because we expect
-    # it to always work (and if it does not, it will raise).
-    Repo.delete!(user)
+    case verify_user(token, id) do
+      {:ok, id} ->
+        user = Repo.get!(User, id)
 
-    send_resp(conn, :no_content, "")
+        # Here we use delete! (with a bang) because we expect
+        # it to always work (and if it does not, it will raise).
+        Repo.delete!(user)
+
+        send_resp(conn, :no_content, "")
+      {:error, _} ->
+        send_401(conn)
+    end
+  end
+
+  defp verify_user(token, id) do
+    with {:ok, user_id} <- Phoenix.Token.verify(UserService.Endpoint, "user", token) do
+      case user_id do
+        ^id ->
+           {:ok, id}
+         _ ->
+           {:error, :invalid}
+      end
+    end
+  end
+
+  defp send_401(conn) do
+    send_resp(conn, 401, "{errors:[\"unauthorized\"]}")
   end
 end

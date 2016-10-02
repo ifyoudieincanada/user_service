@@ -10,9 +10,13 @@ defmodule UserService.UserView do
   end
 
   def render("user.json", %{user: user, token: token}) do
-    %{id: user.id,
-      username: user.username,
-      email: user.email,
-      token: token}
+    %{
+      "user" => %{
+        id: user.id,
+        username: user.username,
+        email: user.email
+      },
+      "token" => :base64.encode(token)
+    }
   end
 end

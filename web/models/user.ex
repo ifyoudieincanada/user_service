@@ -6,6 +6,7 @@ defmodule UserService.User do
     field :email, :string
     field :password_tmp, :string, virtual: true
     field :password, :string
+    has_many :permissions, UserService.Permission
 
     timestamps()
   end
