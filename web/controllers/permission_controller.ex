@@ -35,8 +35,10 @@ defmodule UserService.PermissionController do
     end
   end
 
-  def delete(conn, %{"id" => id, "token" => token}) do
-    token = :base64.decode(token)
+  def delete(conn, %{"id" => id}) do
+    token = get_req_header(conn, "token")
+            |> :base64.decode(token)
+
     case ensure_admin(token) do
       {:ok, _} ->
         permission = Repo.get!(Permission, id)

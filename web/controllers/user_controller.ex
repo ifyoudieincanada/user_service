@@ -56,15 +56,14 @@ defmodule UserService.UserController do
       {:ok, user_id} ->
         render(conn, "user.json", user: Repo.get!(User, user_id), token: token)
       {:error, _} ->
-        conn
         send_401(conn)
     end
   end
 
-  def show(conn, %{"id" => id}) do
-    user = Repo.get!(User, id)
-    render(conn, "show.json", user: user)
-  end
+  # def show(conn, %{"id" => id}) do
+  #   user = Repo.get!(User, id)
+  #   render(conn, "show.json", user: user)
+  # end
 
   def update(conn, %{"id" => id, "user" => user_params, "token" => token}) do
     :base64.decode(token)
@@ -83,13 +82,13 @@ defmodule UserService.UserController do
             |> render(UserService.ChangesetView, "error.json", changeset: changeset)
         end
       {:error, _} ->
-        conn
         send_401(conn)
     end
   end
 
-  def delete(conn, %{"id" => id, "token" => token}) do
-    :base64.decode(token)
+  def delete(conn, %{"id" => id}) do
+    token = get_req_header(conn, "token")
+            |> :base64.decode
 
     case verify_user(token, id) do
       {:ok, id} ->

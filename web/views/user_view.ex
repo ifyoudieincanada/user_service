@@ -19,4 +19,14 @@ defmodule UserService.UserView do
       "token" => :base64.encode(token)
     }
   end
+
+  def render("user.json", %{user: user}) do
+    %{
+      "user" => %{
+        id: user.id,
+        username: user.username,
+        email: user.email
+      }
+    }
+  end
 end
