@@ -19,6 +19,8 @@ defmodule UserService.UserController do
 
     case Repo.insert(changeset) do
       {:ok, user} ->
+        EventClient.send_event("user.create", %{"user_id" => user.id})
+
         conn = conn
                |> put_status(:created)
                |> put_resp_header("location", user_path(conn, :show, user))
