@@ -6,7 +6,7 @@ defmodule UserService.UserController do
   def create(conn, %{"user" => user_params}) do
     changeset = User.changeset(%User{}, user_params)
 
-    changeset = if Repo.one(User) == nil do
+    changeset = if Repo.all(from u in User, limit: 1, select: u.id) == nil do
       admin = %UserService.Permission{
         name: "admin",
         description: "In control of literally everything"
